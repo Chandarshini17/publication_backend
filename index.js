@@ -37,32 +37,44 @@ const connectDB = async () => {
 };
 
 // Routes
-app.post("/publications", async (req, res) => {
-  const { year, volume, issue, title, content, data, link } = req.body;
 
+// 1. Fetch all distinct years
+app.get("/years", async (req, res) => {
   try {
-    const newPublication = new Publication({
-      year,
-      volume,
-      issue,
-      title,
-      content,
-      data,
-      link,
-    });
-    await newPublication.save();
-    res.status(201).json(newPublication);
+    const years = await Publication.distinct("year");
+    res.json(years);
   } catch (err) {
-    console.error("Error creating publication:", err.message);
-    res.status(400).json({ error: err.message });
+    console.error("Error fetching years:", err.message);
+    res.status(500).json({ error: "Failed to fetch years." });
   }
 });
 
-app.get("/publications", async (req, res) => {
-  const { volume } = req.query;
+// 2. Fetch volumes under a specific year
+app.get("/volumes", async (req, res) => {
+  const { year } = req.query;
+
+  if (!year) {
+    return res.status(400).json({ error: "Year parameter is required." });
+  }
 
   try {
-    const query = volume ? { volume: Number(volume) } : {};
+    const volumes = await Publication.find({ year: Number(year) }).distinct("volume");
+    res.json(volumes);
+  } catch (err) {
+    console.error("Error fetching volumes:", err.message);
+    res.status(500).json({ error: "Failed to fetch volumes." });
+  }
+});
+
+// 3. Fetch data for a specific year and volume
+app.get("/publications", async (req, res) => {
+  const { year, volume } = req.query;
+
+  try {
+    const query = {};
+    if (year) query.year = Number(year);
+    if (volume) query.volume = Number(volume);
+
     const publications = await Publication.find(query);
     res.json(publications);
   } catch (err) {
