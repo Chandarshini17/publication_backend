@@ -105,6 +105,41 @@ app.delete("/publications/:id", async (req, res) => {
   }
 });
 
+// 5. Add a new publication
+app.post("/publications", async (req, res) => {
+  const { year, volume, issue, title, content, data, link } = req.body;
+
+  // Validate required fields
+  if (!year || !volume || !issue || !title || !content || !link) {
+    return res.status(400).json({ error: "All required fields must be provided." });
+  }
+
+  try {
+    // Create a new publication
+    const newPublication = new Publication({
+      year,
+      volume,
+      issue,
+      title,
+      content,
+      data, // Optional field
+      link,
+    });
+
+    // Save to the database
+    const savedPublication = await newPublication.save();
+
+    res.status(201).json({
+      message: "Publication added successfully.",
+      data: savedPublication,
+    });
+  } catch (err) {
+    console.error("Error adding publication:", err.message);
+    res.status(500).json({ error: "Failed to add publication." });
+  }
+});
+
+
 // Start Server
 const startServer = async () => {
   await connectDB();
