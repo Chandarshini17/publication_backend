@@ -83,6 +83,28 @@ app.get("/publications", async (req, res) => {
   }
 });
 
+// 4. Delete a publication by ID
+app.delete("/publications/:id", async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: "Publication ID is required." });
+  }
+
+  try {
+    const deletedPublication = await Publication.findByIdAndDelete(id);
+
+    if (!deletedPublication) {
+      return res.status(404).json({ error: "Publication not found." });
+    }
+
+    res.json({ message: "Publication deleted successfully.", data: deletedPublication });
+  } catch (err) {
+    console.error("Error deleting publication:", err.message);
+    res.status(500).json({ error: "Failed to delete publication." });
+  }
+});
+
 // Start Server
 const startServer = async () => {
   await connectDB();
