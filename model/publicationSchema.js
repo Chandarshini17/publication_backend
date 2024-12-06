@@ -6,7 +6,7 @@ const publicationSchema = new mongoose.Schema({
     required: true,
   },
   volume: {
-    type: Number,
+    type: String,
     required: true,
   },
   issue: {
