@@ -13,6 +13,11 @@ const publicationSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  isSpecialIssue: {
+    type: Boolean, // Flag for special issues
+    required: true,
+    default: false,
+  },
   title: {
     type: String,
     required: true,

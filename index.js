@@ -24,10 +24,6 @@ const connectDB = async () => {
   try {
     await mongoose.connect(
       "mongodb+srv://academicdevelopmentforum24:Publisher24@publisher.fcpbj.mongodb.net/publication",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
     );
     console.log("Connected to DB");
   } catch (err) {
@@ -68,12 +64,14 @@ app.get("/volumes", async (req, res) => {
 
 // 3. Fetch data for a specific year and volume
 app.get("/publications", async (req, res) => {
-  const { year, volume } = req.query;
+  const { year, volume, issue, isSpecialIssue } = req.query;
 
   try {
     const query = {};
     if (year) query.year = Number(year);
     if (volume) query.volume = Number(volume);
+    if (issue) query.issue = Number(issue);
+    if (isSpecialIssue !== undefined) query.isSpecialIssue = isSpecialIssue === "true";
 
     const publications = await Publication.find(query);
     res.json(publications);
@@ -82,6 +80,18 @@ app.get("/publications", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch publications." });
   }
 });
+
+app.get("/special-issues", async (req, res) => {
+  try {
+    const specialIssues = await Publication.find({ isSpecialIssue: true });
+
+    res.json(specialIssues);
+  } catch (err) {
+    console.error("Error fetching special issues:", err.message);
+    res.status(500).json({ error: "Failed to fetch special issues." });
+  }
+});
+
 
 // 4. Delete a publication by ID
 app.delete("/publications/:id", async (req, res) => {
@@ -107,7 +117,7 @@ app.delete("/publications/:id", async (req, res) => {
 
 // 5. Add a new publication
 app.post("/publications", async (req, res) => {
-  const { year, volume, issue, title, content, data, link } = req.body;
+  const { year, volume, issue, title, content, data, link, isSpecialIssue } = req.body;
 
   // Validate required fields
   if (!year || !volume || !issue || !title || !content || !link) {
@@ -124,6 +134,7 @@ app.post("/publications", async (req, res) => {
       content,
       data, // Optional field
       link,
+      isSpecialIssue: isSpecialIssue !== undefined ? isSpecialIssue : false,
     });
 
     // Save to the database
