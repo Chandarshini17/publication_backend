@@ -82,8 +82,16 @@ app.get("/publications", async (req, res) => {
 });
 
 app.get("/special-issues", async (req, res) => {
+  const { year, volume, issue } = req.query;
+
   try {
-    const specialIssues = await Publication.find({ isSpecialIssue: true });
+    const query = { isSpecialIssue: true };
+
+    if (year) query.year = Number(year);
+    if (volume) query.volume = volume;
+    if (issue) query.issue = Number(issue);
+
+    const specialIssues = await Publication.find(query);
 
     res.json(specialIssues);
   } catch (err) {
@@ -91,7 +99,6 @@ app.get("/special-issues", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch special issues." });
   }
 });
-
 
 // 4. Delete a publication by ID
 app.delete("/publications/:id", async (req, res) => {
