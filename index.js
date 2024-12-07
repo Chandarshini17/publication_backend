@@ -69,7 +69,7 @@ app.get("/publications", async (req, res) => {
   try {
     const query = {};
     if (year) query.year = Number(year);
-    if (volume) query.volume = Number(volume);
+    if (volume) query.volume = volume;
     if (issue) query.issue = Number(issue);
     if (isSpecialIssue !== undefined) query.isSpecialIssue = isSpecialIssue === "true";
 
