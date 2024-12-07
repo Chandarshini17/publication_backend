@@ -62,16 +62,17 @@ app.get("/volumes", async (req, res) => {
   }
 });
 
-// 3. Fetch data for a specific year and volume
+// Fetch publications for a specific regular issue
 app.get("/publications", async (req, res) => {
-  const { year, volume, issue, isSpecialIssue } = req.query;
+  const { year, volume, issue } = req.query;
 
   try {
-    const query = {};
-    if (year) query.year = Number(year);
-    if (volume) query.volume = Number(volume);
-    if (issue) query.issue = Number(issue);
-    if (isSpecialIssue !== undefined) query.isSpecialIssue = isSpecialIssue === "true";
+    const query = {
+      year: Number(year),
+      volume: Number(volume),
+      issue: Number(issue),
+      isSpecialIssue: false,
+    };
 
     const publications = await Publication.find(query);
     res.json(publications);
@@ -81,17 +82,23 @@ app.get("/publications", async (req, res) => {
   }
 });
 
+// Fetch publications for a specific special issue
 app.get("/special-issues", async (req, res) => {
-  try {
-    const specialIssues = await Publication.find({ isSpecialIssue: true });
+  const { year, issue } = req.query; // Query filtering using year and issue
 
-    res.json(specialIssues);
+  try {
+    const publications = await Publication.find({
+      year: Number(year),
+      issue: Number(issue),
+      isSpecialIssue: true,
+    });
+
+    res.json(publications);
   } catch (err) {
-    console.error("Error fetching special issues:", err.message);
-    res.status(500).json({ error: "Failed to fetch special issues." });
+    console.error("Error fetching special issue data:", err.message);
+    res.status(500).json({ error: "Failed to fetch special issue publications." });
   }
 });
-
 
 // 4. Delete a publication by ID
 app.delete("/publications/:id", async (req, res) => {
