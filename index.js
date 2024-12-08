@@ -35,7 +35,7 @@ const connectDB = async () => {
 // Routes
 
 // 1. Fetch all distinct years
-app.get("/years", async (req, res) => {
+app.get("/publications/years", async (req, res) => {
   try {
     const years = await Publication.distinct("year");
     res.json(years);
@@ -45,8 +45,18 @@ app.get("/years", async (req, res) => {
   }
 });
 
+app.get("/special-issues/years", async (req, res) => {
+  try {
+    const years = await Publication.find({ isSpecialIssue: true }).distinct("year");
+    res.json(years);
+  } catch (err) {
+    console.error("Error fetching special issue years:", err.message);
+    res.status(500).json({ error: "Failed to fetch years for special issues." });
+  }
+});
+
 // 2. Fetch volumes under a specific year
-app.get("/volumes", async (req, res) => {
+app.get("/publications/volumes", async (req, res) => {
   const { year } = req.query;
 
   if (!year) {
@@ -59,6 +69,22 @@ app.get("/volumes", async (req, res) => {
   } catch (err) {
     console.error("Error fetching volumes:", err.message);
     res.status(500).json({ error: "Failed to fetch volumes." });
+  }
+});
+
+app.get("/special-issues/volumes", async (req, res) => {
+  const { year } = req.query;
+
+  if (!year) {
+    return res.status(400).json({ error: "Year parameter is required." });
+  }
+
+  try {
+    const volumes = await Publication.find({ year: Number(year), isSpecialIssue: true }).distinct("volume");
+    res.json(volumes);
+  } catch (err) {
+    console.error("Error fetching special issue volumes:", err.message);
+    res.status(500).json({ error: "Failed to fetch volumes for special issues." });
   }
 });
 
